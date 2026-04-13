@@ -1,0 +1,204 @@
+from __future__ import annotations
+
+from datetime import date as date_type
+import uuid
+
+from fastapi import APIRouter, Depends, Query
+from sqlalchemy import Select, func, or_, select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.database import get_db
+from app.models import SearchEvent, SlotStatus, Space, SpaceType, User, UserRole
+from app.schemas import SpaceDetail, SpaceSummary, SpaceUpsert, SyncGoogleRequest, TimeSlotOut
+from app.services.google_places import sync_google_places
+from app.services.slot_manager import ensure_slots_for_date, sweep_expired_holds
+from app.utils.errors import api_error
+from app.utils.security import get_optional_user, require_roles
+from app.utils.serializers import serialize_space
+
+
+router = APIRouter(prefix="/api/spaces", tags=["spaces"])
+
+
+def _normalize_multi(values: list[str] | None) -> list[str]:
+    if not values:
+        return []
+    normalized: list[str] = []
+    for value in values:
+        normalized.extend([item.strip() for item in value.split(",") if item.strip()])
+    return normalized
+
+
+async def _search_spaces(
+    session: AsyncSession,
+    *,
+    search_query: str | None = None,
+    space_type: SpaceType | None = None,
+    locality: list[str] | None = None,
+    price_min: float | None = None,
+    price_max: float | None = None,
+    rating: float | None = None,
+    amenities: list[str] | None = None,
+    sort: str = "relevance",
+) -> list[Space]:
+    query: Select[tuple[Space]] = select(Space).where(Space.is_active.is_(True))
+    if space_type:
+        query = query.where(Space.type == space_type)
+    if locality:
+        query = query.where(func.lower(Space.locality).in_([item.lower() for item in locality]))
+    if price_min is not None:
+        query = query.where(Space.price_per_hour >= price_min)
+    if price_max is not None:
+        query = query.where(Space.price_per_hour <= price_max)
+    if rating is not None:
+        query = query.where(Space.rating >= rating)
+    if search_query:
+        pattern = f"%{search_query.lower()}%"
+        query = query.where(
+            or_(
+                func.lower(Space.name).like(pattern),
+                func.lower(func.coalesce(Space.locality, "")).like(pattern),
+                func.lower(func.coalesce(Space.address, "")).like(pattern),
+            )
+        )
+
+    if sort == "price_asc":
+        query = query.order_by(Space.price_per_hour.asc())
+    elif sort == "rating":
+        query = query.order_by(Space.rating.desc().nullslast())
+    else:
+        query = query.order_by(Space.rating.desc().nullslast(), Space.total_reviews.desc(), Space.created_at.desc())
+
+    result = await session.execute(query.limit(24))
+    spaces = list(result.scalars().all())
+
+    amenity_filters = {value.lower() for value in amenities or []}
+    if amenity_filters:
+        spaces = [
+            space
+            for space in spaces
+            if amenity_filters.issubset({amenity.lower() for amenity in (space.amenities or [])})
+        ]
+    return spaces
+
+
+@router.post("/sync-google")
+async def sync_spaces_from_google(
+    payload: SyncGoogleRequest,
+    session: AsyncSession = Depends(get_db),
+    _user: User = Depends(require_roles(UserRole.partner, UserRole.admin)),
+) -> dict:
+    return await sync_google_places(session, payload.queries)
+
+
+@router.get("", response_model=list[SpaceSummary])
+async def list_spaces(
+    q: str | None = Query(default=None, alias="search_query"),
+    type: SpaceType | None = None,
+    locality: list[str] = Query(default=[]),
+    price_min: float | None = None,
+    price_max: float | None = None,
+    rating: float | None = None,
+    amenities: list[str] = Query(default=[]),
+    available_on: date_type | None = Query(default=None, alias="date"),
+    sort: str = "relevance",
+    session: AsyncSession = Depends(get_db),
+    user: User | None = Depends(get_optional_user),
+) -> list[SpaceSummary]:
+    normalized_locality = _normalize_multi(locality)
+    normalized_amenities = _normalize_multi(amenities)
+
+    spaces = await _search_spaces(
+        session,
+        search_query=q,
+        space_type=type,
+        locality=normalized_locality,
+        price_min=price_min,
+        price_max=price_max,
+        rating=rating,
+        amenities=normalized_amenities,
+        sort=sort,
+    )
+    if not spaces and q:
+        await sync_google_places(session, [f"{q} Bangalore"])
+        spaces = await _search_spaces(
+            session,
+            search_query=q,
+            space_type=type,
+            locality=normalized_locality,
+            price_min=price_min,
+            price_max=price_max,
+            rating=rating,
+            amenities=normalized_amenities,
+            sort=sort,
+        )
+
+    if user and q:
+        session.add(SearchEvent(user_id=user.id, query=q, locality=normalized_locality[0] if normalized_locality else None))
+        await session.commit()
+
+    await sweep_expired_holds(session)
+    response: list[SpaceSummary] = []
+    for space in spaces:
+        availability_count = None
+        if available_on:
+            slots = await ensure_slots_for_date(session, space, available_on)
+            availability_count = len([slot for slot in slots if slot.status == SlotStatus.available])
+        response.append(SpaceSummary.model_validate(serialize_space(space, availability_count)))
+    return response
+
+
+@router.get("/{space_id}", response_model=SpaceDetail)
+async def get_space(
+    space_id: str,
+    booking_date: date_type | None = Query(default=None, alias="date"),
+    session: AsyncSession = Depends(get_db),
+) -> SpaceDetail:
+    result = await session.execute(select(Space).where(Space.id == uuid.UUID(space_id), Space.is_active.is_(True)))
+    space = result.scalar_one_or_none()
+    if not space:
+        raise api_error(404, "Space not found", "space_not_found")
+
+    target_date = booking_date or date_type.today()
+    await sweep_expired_holds(session)
+    slots = await ensure_slots_for_date(session, space, target_date)
+    payload = serialize_space(
+        space,
+        availability_count=len([slot for slot in slots if slot.status == SlotStatus.available]),
+    )
+    payload["available_slots"] = [TimeSlotOut.model_validate(slot) for slot in slots]
+    return SpaceDetail.model_validate(payload)
+
+
+@router.post("", response_model=SpaceSummary)
+async def create_space(
+    payload: SpaceUpsert,
+    session: AsyncSession = Depends(get_db),
+    user: User = Depends(require_roles(UserRole.partner, UserRole.admin)),
+) -> SpaceSummary:
+    space = Space(**payload.model_dump(), owner_id=user.id if user.role == UserRole.partner else None, source="partner")
+    session.add(space)
+    await session.commit()
+    await session.refresh(space)
+    return SpaceSummary.model_validate(serialize_space(space))
+
+
+@router.put("/{space_id}", response_model=SpaceSummary)
+async def update_space(
+    space_id: str,
+    payload: SpaceUpsert,
+    session: AsyncSession = Depends(get_db),
+    user: User = Depends(require_roles(UserRole.partner, UserRole.admin)),
+) -> SpaceSummary:
+    result = await session.execute(select(Space).where(Space.id == uuid.UUID(space_id)))
+    space = result.scalar_one_or_none()
+    if not space:
+        raise api_error(404, "Space not found", "space_not_found")
+    if user.role == UserRole.partner and space.owner_id != user.id:
+        raise api_error(403, "You can only update your own spaces", "not_space_owner")
+
+    for field, value in payload.model_dump().items():
+        setattr(space, field, value)
+    await session.commit()
+    await session.refresh(space)
+    return SpaceSummary.model_validate(serialize_space(space))

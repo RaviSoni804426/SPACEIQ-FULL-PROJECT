@@ -1,0 +1,15 @@
+venv/
+.vscode/
+*.log
+
+spaceiq/.env
+spaceiq/.env.*
+!spaceiq/.env.example
+
+spaceiq/frontend/.next/
+spaceiq/frontend/node_modules/
+
+spaceiq/backend/*.db
+spaceiq/backend/*.sqlite3
+spaceiq/backend/__pycache__/
+spaceiq/backend/app/**/__pycache__/
