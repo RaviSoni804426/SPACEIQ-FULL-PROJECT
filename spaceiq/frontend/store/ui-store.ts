@@ -28,6 +28,6 @@ export const useUiStore = create<UiState>()(
         });
       },
     }),
-    { name: "spacebook-ui" },
+    { name: "spaceiq-ui" },
   ),
 );

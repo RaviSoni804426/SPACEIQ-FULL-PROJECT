@@ -1,1 +1,1 @@
-"""SpaceBook backend application package."""
+"""SpaceIQ backend application package."""

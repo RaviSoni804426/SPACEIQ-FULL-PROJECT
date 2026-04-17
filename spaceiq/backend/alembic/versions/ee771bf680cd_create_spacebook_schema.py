@@ -1,4 +1,4 @@
-"""create_spacebook_schema
+"""create_spaceiq_schema
 
 Revision ID: ee771bf680cd
 Revises: 

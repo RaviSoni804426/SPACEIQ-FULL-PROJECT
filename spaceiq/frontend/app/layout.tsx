@@ -12,8 +12,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "SpaceBook",
-  description: "Discover and book Bangalore coworking spaces and sports venues.",
+  title: "SpaceIQ",
+  description: "AI-assisted platform for discovering and booking Bangalore spaces.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

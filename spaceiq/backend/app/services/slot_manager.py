@@ -21,6 +21,7 @@ from app.utils.errors import api_error
 logger = logging.getLogger(__name__)
 _redis_client: Redis | None = None
 _redis_disabled = False
+REDIS_KEY_PREFIX = "spaceiq"
 
 
 def utc_now() -> datetime:
@@ -274,24 +275,24 @@ async def cancel_booking(session: AsyncSession, booking: Booking, reason: str) -
 def _delete_slot_keys(slots: list[TimeSlot]) -> Callable[[Redis], Awaitable[None]]:
     async def operation(redis: Redis) -> None:
         for slot in slots:
-            await redis.delete(f"spacebook:slot:{slot.id}")
+            await redis.delete(f"{REDIS_KEY_PREFIX}:slot:{slot.id}")
 
     return operation
 
 
 def _store_hold(hold_id: str, slots: list[TimeSlot], payload: dict[str, object]) -> Callable[[Redis], Awaitable[None]]:
     async def operation(redis: Redis) -> None:
-        await redis.set(f"spacebook:hold:{hold_id}", json.dumps(payload), ex=settings.hold_duration_seconds)
+        await redis.set(f"{REDIS_KEY_PREFIX}:hold:{hold_id}", json.dumps(payload), ex=settings.hold_duration_seconds)
         for slot in slots:
-            await redis.set(f"spacebook:slot:{slot.id}", hold_id, ex=settings.hold_duration_seconds)
+            await redis.set(f"{REDIS_KEY_PREFIX}:slot:{slot.id}", hold_id, ex=settings.hold_duration_seconds)
 
     return operation
 
 
 def _delete_hold(hold_id: str, slots: list[TimeSlot]) -> Callable[[Redis], Awaitable[None]]:
     async def operation(redis: Redis) -> None:
-        await redis.delete(f"spacebook:hold:{hold_id}")
+        await redis.delete(f"{REDIS_KEY_PREFIX}:hold:{hold_id}")
         for slot in slots:
-            await redis.delete(f"spacebook:slot:{slot.id}")
+            await redis.delete(f"{REDIS_KEY_PREFIX}:slot:{slot.id}")
 
     return operation

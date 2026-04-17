@@ -11,14 +11,14 @@ from app.utils.security import get_password_hash
 
 DEMO_USERS = [
     {
-        "email": "test@spacebook.in",
-        "full_name": "SpaceBook Test User",
+        "email": "test@spaceiq.in",
+        "full_name": "SpaceIQ Test User",
         "phone": "9876543210",
         "role": UserRole.user,
     },
     {
-        "email": "partner@spacebook.in",
-        "full_name": "SpaceBook Partner",
+        "email": "partner@spaceiq.in",
+        "full_name": "SpaceIQ Partner",
         "phone": "9876500000",
         "role": UserRole.partner,
     },

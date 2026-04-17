@@ -12,7 +12,7 @@ export function SpaceMap({
   longitude?: number | null;
 }) {
   const { isLoaded } = useJsApiLoader({
-    id: "spacebook-map",
+    id: "spaceiq-map",
     googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_KEY ?? "",
   });
 

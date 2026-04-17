@@ -61,7 +61,7 @@ export function RazorpayButton({
         amount: init.amount,
         currency: init.currency,
         order_id: init.order_id,
-        name: "SpaceBook",
+        name: "SpaceIQ",
         description: init.booking_summary.space_name,
         prefill: {
           name: user?.full_name ?? "",

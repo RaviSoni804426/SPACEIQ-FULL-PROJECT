@@ -46,7 +46,7 @@ export default function LoginPage() {
   async function onSubmit(values: LoginValues) {
     try {
       await login.mutateAsync(values);
-      toast.success("Welcome back to SpaceBook.");
+      toast.success("Welcome back to SpaceIQ.");
       router.push("/dashboard");
     } catch (error) {
       toast.error(getErrorDetail(error));
@@ -59,7 +59,7 @@ export default function LoginPage() {
         <section className="hidden bg-slate-950 p-10 text-white lg:flex lg:flex-col lg:justify-between">
           <div className="space-y-5">
             <div className="inline-flex items-center gap-2 text-lg font-semibold">
-              <span>SpaceBook</span>
+              <span>SpaceIQ</span>
               <span className="h-2.5 w-2.5 rounded-full bg-primary" />
             </div>
             <div className="space-y-3">
@@ -91,7 +91,7 @@ export default function LoginPage() {
             <CardContent className="space-y-8 p-0">
               <div className="space-y-2">
                 <p className="text-sm font-medium uppercase tracking-[0.24em] text-primary">Login</p>
-                <h2 className="text-3xl font-semibold tracking-tight text-slate-950">Access your SpaceBook account</h2>
+                <h2 className="text-3xl font-semibold tracking-tight text-slate-950">Access your SpaceIQ account</h2>
                 <p className="text-sm leading-7 text-slate-500">
                   Use your email and password to continue to bookings, analytics, and saved spaces.
                 </p>
@@ -123,7 +123,7 @@ export default function LoginPage() {
               <GoogleSignInButton mode="signin" />
 
               <p className="text-sm text-slate-500">
-                New to SpaceBook?{" "}
+                New to SpaceIQ?{" "}
                 <Link className="font-medium text-primary hover:text-orange-500" href="/register">
                   Create an account
                 </Link>

@@ -5,7 +5,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 
 import type { TokenPair, User } from "@/types";
 
-const AUTH_STORAGE_KEY = "spacebook-auth";
+const AUTH_STORAGE_KEY = "spaceiq-auth";
 
 type AuthState = {
   accessToken: string | null;

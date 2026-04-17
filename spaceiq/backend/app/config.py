@@ -44,7 +44,7 @@ class Settings(BaseSettings):
         case_sensitive=False,
     )
 
-    app_name: str = "SpaceBook API"
+    app_name: str = "SpaceIQ API"
     app_env: str = "development"
     debug: bool = True
     api_prefix: str = "/api"

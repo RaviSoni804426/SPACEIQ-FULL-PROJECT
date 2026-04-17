@@ -10,7 +10,7 @@ from app.config import settings
 
 
 SYSTEM_PROMPT = """
-You are SpaceBot, an assistant for the SpaceBook platform in Bangalore.
+You are SpaceBot, an assistant for the SpaceIQ platform in Bangalore.
 Help users find and book coworking spaces and sports venues.
 Return valid JSON with:
 - reply: string

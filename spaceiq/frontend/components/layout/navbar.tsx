@@ -40,8 +40,8 @@ export function Navbar() {
           >
             <Menu className="h-5 w-5" />
           </button>
-          <Link className="flex items-center gap-2 text-lg font-semibold tracking-tight" href="/dashboard">
-            <span>SpaceBook</span>
+          <Link className="flex items-center gap-2 text-lg font-semibold tracking-tight" href="/">
+            <span>SpaceIQ</span>
             <span className="h-2.5 w-2.5 rounded-full bg-primary" />
           </Link>
         </div>
@@ -111,7 +111,7 @@ export function Navbar() {
             >
               <div className="flex items-center justify-between">
                 <span className="flex items-center gap-2 text-lg font-semibold">
-                  SpaceBook
+                  SpaceIQ
                   <span className="h-2.5 w-2.5 rounded-full bg-primary" />
                 </span>
                 <button className="rounded-full p-2 text-white" onClick={() => setOpen(false)} type="button">

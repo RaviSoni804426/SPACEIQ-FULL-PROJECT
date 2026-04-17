@@ -135,7 +135,7 @@ export default function RegisterPage() {
         <section className="hidden bg-gradient-to-br from-orange-500 via-orange-400 to-amber-300 p-10 text-white lg:block">
           <div className="space-y-8">
             <div className="space-y-3">
-              <p className="text-sm font-medium uppercase tracking-[0.24em] text-white/80">Why SpaceBook</p>
+              <p className="text-sm font-medium uppercase tracking-[0.24em] text-white/80">Why SpaceIQ</p>
               <h2 className="max-w-md text-4xl font-semibold leading-tight">One place to find coworking, courts, studios, and meeting rooms.</h2>
             </div>
 

@@ -45,10 +45,10 @@ export default function BookingPage() {
     if (!bookingId) {
       return;
     }
-    const shareText = `My SpaceBook booking is confirmed. Booking ID: ${bookingId}`;
+    const shareText = `My SpaceIQ booking is confirmed. Booking ID: ${bookingId}`;
     if (navigator.share) {
       await navigator.share({
-        title: "SpaceBook Booking",
+        title: "SpaceIQ Booking",
         text: shareText,
       });
       return;
@@ -272,7 +272,7 @@ function buildCalendarUrl(title: string, bookingDate: string, startTime: string,
     action: "TEMPLATE",
     text: title,
     dates: `${start}/${end}`,
-    details: "Booked with SpaceBook",
+    details: "Booked with SpaceIQ",
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
 }
