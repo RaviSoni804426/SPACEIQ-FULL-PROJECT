@@ -59,7 +59,6 @@ export function useCreateReview() {
     mutationFn: apiClient.createReview,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ["bookings", "my"] });
-      void queryClient.invalidateQueries({ queryKey: ["analytics"] });
     },
   });
 }

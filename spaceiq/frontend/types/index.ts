@@ -93,47 +93,6 @@ export interface Review {
   created_at: string;
 }
 
-export interface ChartPoint {
-  label: string;
-  value: number;
-}
-
-export interface RevenuePoint {
-  space_name: string;
-  space_type: SpaceType;
-  value: number;
-}
-
-export interface AnalyticsOverview {
-  total_bookings: number;
-  total_revenue: number;
-  active_spaces: number;
-  average_rating: number;
-}
-
-export interface RecentSearch {
-  query: string;
-  locality?: string | null;
-  created_at: string;
-}
-
-export interface TrendingLocality {
-  locality: string;
-  space_count: number;
-  average_price: number;
-}
-
-export interface ChatTurn {
-  role: "user" | "assistant";
-  content: string;
-}
-
-export interface ChatResponse {
-  reply: string;
-  intent: string;
-  suggested_spaces: Space[];
-}
-
 export interface ApiError {
   detail: string;
   code: string;

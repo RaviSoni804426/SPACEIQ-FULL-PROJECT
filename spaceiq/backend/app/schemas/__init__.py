@@ -5,7 +5,7 @@ from decimal import Decimal
 from typing import Literal
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
+from pydantic import BaseModel, ConfigDict, EmailStr, Field
 
 from app.models import BookingStatus, SlotStatus, SpaceType, UserRole
 
@@ -45,10 +45,6 @@ class LoginRequest(BaseModel):
 
 class RefreshRequest(BaseModel):
     refresh_token: str
-
-
-class GoogleLoginRequest(BaseModel):
-    id_token: str
 
 
 class ProfileUpdateRequest(BaseModel):
@@ -92,37 +88,6 @@ class SpaceSummary(ORMModel):
 class SpaceDetail(SpaceSummary):
     operating_hours: dict[str, list[str]]
     available_slots: list[TimeSlotOut]
-
-
-class SpaceUpsert(BaseModel):
-    name: str
-    type: SpaceType
-    description: str | None = None
-    address: str | None = None
-    city: str = "Bangalore"
-    locality: str | None = None
-    latitude: float | None = None
-    longitude: float | None = None
-    price_per_hour: Decimal = Field(gt=0)
-    rating: float | None = None
-    total_reviews: int = 0
-    amenities: list[str] = Field(default_factory=list)
-    images: list[str] = Field(default_factory=list)
-    operating_hours: dict[str, list[str]] = Field(default_factory=dict)
-    website_url: str | None = None
-    phone_number: str | None = None
-    is_active: bool = True
-
-
-class SyncGoogleRequest(BaseModel):
-    queries: list[str] = Field(
-        default_factory=lambda: [
-            "coworking space Bangalore",
-            "sports venue Bangalore",
-            "meeting room Bangalore",
-            "studio rental Bangalore",
-        ]
-    )
 
 
 class HoldRequest(BaseModel):
@@ -211,52 +176,6 @@ class ReviewOut(ORMModel):
     created_at: datetime
 
 
-class ChatTurn(BaseModel):
-    role: Literal["user", "assistant"]
-    content: str
-
-
-class ChatRequest(BaseModel):
-    message: str = Field(min_length=2, max_length=800)
-    history: list[ChatTurn] = Field(default_factory=list)
-
-
-class ChatResponse(BaseModel):
-    reply: str
-    intent: str
-    suggested_spaces: list[SpaceSummary] = Field(default_factory=list)
-
-
-class OverviewStats(BaseModel):
-    total_bookings: int
-    total_revenue: float
-    active_spaces: int
-    average_rating: float
-
-
-class ChartPoint(BaseModel):
-    label: str
-    value: float
-
-
-class RevenueBySpacePoint(BaseModel):
-    space_name: str
-    space_type: SpaceType
-    value: float
-
-
-class RecentSearchOut(BaseModel):
-    query: str
-    locality: str | None = None
-    created_at: datetime
-
-
-class TrendingLocalityOut(BaseModel):
-    locality: str
-    space_count: int
-    average_price: float
-
-
 class ErrorResponse(BaseModel):
     detail: str
     code: str
@@ -265,23 +184,3 @@ class ErrorResponse(BaseModel):
 class MessageResponse(BaseModel):
     detail: str
     code: str = "ok"
-
-
-class SpaceFilters(BaseModel):
-    search_query: str | None = None
-    type: SpaceType | None = None
-    locality: list[str] = Field(default_factory=list)
-    price_min: float | None = None
-    price_max: float | None = None
-    rating: float | None = None
-    amenities: list[str] = Field(default_factory=list)
-    available_date: date | None = Field(default=None, alias="date")
-    sort: str = "relevance"
-
-    @field_validator("sort")
-    @classmethod
-    def validate_sort(cls, value: str) -> str:
-        allowed = {"relevance", "price_asc", "rating", "distance"}
-        if value not in allowed:
-            return "relevance"
-        return value

@@ -2,17 +2,11 @@ import axios from "axios";
 
 import { getAuthSnapshot } from "@/store/auth-store";
 import type {
-  AnalyticsOverview,
   Booking,
-  ChartPoint,
-  ChatResponse,
   HoldResponse,
-  RecentSearch,
-  RevenuePoint,
   Review,
   Space,
   TokenPair,
-  TrendingLocality,
   User,
 } from "@/types";
 
@@ -45,10 +39,6 @@ export const apiClient = {
     const { data } = await api.post<TokenPair>("/api/auth/register", payload);
     return data;
   },
-  googleLogin: async (payload: { id_token: string }) => {
-    const { data } = await api.post<TokenPair>("/api/auth/google", payload);
-    return data;
-  },
   me: async () => {
     const { data } = await api.get<User>("/api/auth/me");
     return data;
@@ -65,10 +55,6 @@ export const apiClient = {
     const { data } = await api.get<Space>(`/api/spaces/${spaceId}`, {
       params: date ? { date } : undefined,
     });
-    return data;
-  },
-  syncGoogle: async () => {
-    const { data } = await api.post<{ synced: number; source?: string; detail?: string }>("/api/spaces/sync-google", {});
     return data;
   },
   holdBooking: async (payload: { space_id: string; date: string; slot_ids: string[] }) => {
@@ -110,42 +96,6 @@ export const apiClient = {
   },
   createReview: async (payload: { booking_id: string; rating: number; comment?: string }) => {
     const { data } = await api.post<Review>("/api/reviews", payload);
-    return data;
-  },
-  chat: async (payload: { message: string; history: { role: "user" | "assistant"; content: string }[] }) => {
-    const { data } = await api.post<ChatResponse>("/api/chat", payload);
-    return data;
-  },
-  recentSearches: async () => {
-    const { data } = await api.get<RecentSearch[]>("/api/discovery/recent-searches");
-    return data;
-  },
-  trendingLocalities: async () => {
-    const { data } = await api.get<TrendingLocality[]>("/api/discovery/trending-localities");
-    return data;
-  },
-  analyticsOverview: async () => {
-    const { data } = await api.get<AnalyticsOverview>("/api/analytics/overview");
-    return data;
-  },
-  bookingsByDay: async () => {
-    const { data } = await api.get<ChartPoint[]>("/api/analytics/bookings-by-day");
-    return data;
-  },
-  revenueBySpace: async () => {
-    const { data } = await api.get<RevenuePoint[]>("/api/analytics/revenue-by-space");
-    return data;
-  },
-  partnerSpaces: async () => {
-    const { data } = await api.get<Space[]>("/api/partner/spaces");
-    return data;
-  },
-  partnerBookings: async () => {
-    const { data } = await api.get<Booking[]>("/api/partner/bookings");
-    return data;
-  },
-  createSpace: async (payload: Record<string, unknown>) => {
-    const { data } = await api.post<Space>("/api/spaces", payload);
     return data;
   },
 };

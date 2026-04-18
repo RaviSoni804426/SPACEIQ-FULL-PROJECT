@@ -21,14 +21,6 @@ export function useRegister() {
   });
 }
 
-export function useGoogleLogin() {
-  const setSession = useAuthStore((state) => state.setSession);
-  return useMutation({
-    mutationFn: apiClient.googleLogin,
-    onSuccess: setSession,
-  });
-}
-
 export function useCurrentUser(enabled = true) {
   const token = useAuthStore((state) => state.accessToken);
   return useQuery({

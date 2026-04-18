@@ -12,11 +12,8 @@ import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/store/auth-store";
 
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "Overview" },
+  { href: "/", label: "Home" },
   { href: "/explore", label: "Explore & Book" },
-  { href: "/ai-assistant", label: "AI Assistant" },
-  { href: "/partner", label: "Partner Hub" },
-  { href: "/analytics", label: "Analytics" },
   { href: "/my-bookings", label: "My Bookings" },
   { href: "/account", label: "Account" },
 ];

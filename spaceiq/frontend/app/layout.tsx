@@ -12,8 +12,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "SpaceIQ",
-  description: "AI-assisted platform for discovering and booking Bangalore spaces.",
+  title: "SpaceIQ Lite",
+  description: "Simple full-stack platform to discover, book, and manage space reservations.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

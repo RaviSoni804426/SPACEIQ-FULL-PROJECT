@@ -61,22 +61,14 @@ class Settings(BaseSettings):
     frontend_url: str = "http://localhost:3000"
     allowed_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
 
-    google_places_api_key: str = ""
-    google_oauth_client_id: str = ""
-    next_public_google_maps_key: str = ""
-
     razorpay_key_id: str = ""
     razorpay_key_secret: str = ""
     next_public_razorpay_key_id: str = ""
-
-    openai_api_key: str = ""
-    openai_model: str = "gpt-4o-mini"
 
     redis_url: str = ""
     hold_duration_seconds: int = 300
     slot_sweep_interval_seconds: int = 60
 
-    chat_rate_limit: str = "15/minute"
     payment_rate_limit: str = "10/minute"
 
     log_level: str = "INFO"
@@ -114,10 +106,6 @@ class Settings(BaseSettings):
     @property
     def razorpay_enabled(self) -> bool:
         return _looks_configured(self.razorpay_key_id) and _looks_configured(self.razorpay_key_secret)
-
-    @property
-    def google_places_enabled(self) -> bool:
-        return _looks_configured(self.google_places_api_key)
 
 
 @lru_cache

@@ -11,7 +11,6 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { useRegister } from "@/hooks/use-auth";
 
 const registerSchema = z.object({
@@ -58,7 +57,7 @@ export default function RegisterPage() {
         phone: values.phone || undefined,
       });
       toast.success("Account created. You are ready to start booking.");
-      router.push("/dashboard");
+      router.push("/explore");
     } catch (error) {
       toast.error(getErrorDetail(error));
     }
@@ -77,7 +76,7 @@ export default function RegisterPage() {
                 </div>
                 <h1 className="text-3xl font-semibold tracking-tight text-slate-950">Start discovering spaces in Bangalore</h1>
                 <p className="text-sm leading-7 text-slate-500">
-                  Join as a user today. You can switch to a partner workflow later if you want to list spaces.
+                  Join as a user and start booking spaces in a few clicks.
                 </p>
               </div>
 
@@ -120,8 +119,6 @@ export default function RegisterPage() {
                 </Button>
               </form>
 
-              <GoogleSignInButton mode="signup" />
-
               <p className="text-sm text-slate-500">
                 Already have an account?{" "}
                 <Link className="font-medium text-primary hover:text-orange-500" href="/login">
@@ -143,7 +140,7 @@ export default function RegisterPage() {
               {[
                 "Search by locality, budget, rating, amenities, and date.",
                 "Hold slots for five minutes so users do not lose availability at checkout.",
-                "Use SpaceBot for fast recommendations across Bangalore neighborhoods.",
+                "Track all your confirmed and cancelled bookings from one page.",
               ].map((point) => (
                 <div className="rounded-2xl border border-white/20 bg-white/10 p-4 text-sm leading-7" key={point}>
                   {point}

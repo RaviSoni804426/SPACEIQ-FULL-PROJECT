@@ -163,7 +163,7 @@ export default function BookingPage() {
               <div className="space-y-3 text-sm leading-7 text-slate-600">
                 <p>Your booking is stored with the verified Razorpay payment reference.</p>
                 <p>You can manage cancellations and booking history from the My Bookings page.</p>
-                <p>Need more time slots? Search for more spaces or ask SpaceBot for alternatives.</p>
+                <p>Need more time slots? Return to Explore and book another space.</p>
               </div>
             </CardContent>
           </Card>

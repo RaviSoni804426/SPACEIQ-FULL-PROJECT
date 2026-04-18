@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 
 import { apiClient } from "@/lib/api";
 
@@ -16,11 +16,5 @@ export function useSpace(spaceId: string, date?: string) {
     queryKey: ["space", spaceId, date],
     queryFn: () => apiClient.space(spaceId, date),
     enabled: Boolean(spaceId),
-  });
-}
-
-export function useSyncGoogleSpaces() {
-  return useMutation({
-    mutationFn: apiClient.syncGoogle,
   });
 }

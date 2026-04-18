@@ -1,123 +1,52 @@
-# SpaceIQ
+# SpaceIQ Lite
 
-SpaceIQ is a full-stack Bangalore-focused platform for discovering, booking, and managing coworking spaces, sports venues, studios, and meeting rooms.
+SpaceIQ Lite is a simplified full-stack booking project designed for portfolio and resume use.
 
-It is built to feel like a real product, not just a CRUD demo:
+## What this version focuses on
 
-- Next.js 14 App Router frontend
-- FastAPI backend with async SQLAlchemy
-- Slot hold orchestration with optional Redis acceleration
-- Google Places sync for live inventory seeding
-- Razorpay checkout and backend payment verification
-- OpenAI-assisted search with a rule-based fallback
+- User authentication (register/login/profile)
+- Space discovery with filters
+- Slot hold and conflict-safe booking flow
+- Razorpay payment initialization + verification
+- Booking history, cancellation, and review submission
 
-## Why this project is resume-ready
+## Tech stack
 
-- It demonstrates complete user journeys: discovery, slot selection, payment, booking history, reviews, and partner inventory management.
-- The backend is modular and interview-friendly: routers, services, models, schemas, utilities, and migrations are clearly separated.
-- External integrations degrade gracefully, so the app still runs locally without every paid service configured.
-- It gives you strong discussion topics around auth, API design, async I/O, state management, payment flows, and product tradeoffs.
+- Frontend: Next.js 14, TypeScript, Tailwind, React Query, Zustand
+- Backend: FastAPI, async SQLAlchemy, Alembic
+- Database: SQLite (default local), Postgres-ready
 
-## Architecture
-
-```text
-Next.js frontend
-    |
-    | HTTP / JSON
-    v
-FastAPI backend (`spaceiq/backend/app`)
-    |
-    |-- Auth and profile management
-    |-- Space discovery and Google sync
-    |-- Slot holds and booking lifecycle
-    |-- Razorpay payment init + verification
-    |-- Reviews, partner views, analytics
-    |-- AI-assisted search
-    |
-    v
-SQLite locally / Postgres in production
-
-Optional services:
-- Redis for faster hold coordination
-- Google Places for real Bangalore inventory
-- Razorpay for real payments
-- OpenAI for richer assistant responses
-```
-
-## Active project structure
+## Project structure
 
 ```text
 spaceiq/
-├── frontend/              # Next.js 14 application
+├── frontend/
+│   ├── app/             # routes: home, explore, space detail, booking, account, auth
+│   ├── components/      # reusable UI + feature components
+│   ├── hooks/           # react-query hooks
+│   ├── lib/             # api client + utils
+│   ├── store/           # auth/ui state (zustand)
+│   └── types/           # shared TS types
 ├── backend/
-│   ├── app/               # Active FastAPI application
-│   ├── alembic/           # Database migrations
-│   ├── data/              # Demo Bangalore inventory seed data
-│   ├── requirements.txt
-│   └── Dockerfile
-├── .env.example
-└── INTERVIEW_GUIDE.md
+│   ├── app/
+│   │   ├── routers/    # auth, spaces, bookings, payments, reviews
+│   │   ├── services/   # slot manager + payment service
+│   │   ├── models/
+│   │   └── schemas/
+│   ├── alembic/
+│   └── requirements.txt
+└── .env.example
 ```
 
-## Main product flows
+## Local setup
 
-- Search spaces by locality, category, price, rating, and amenities
-- Generate hourly slots dynamically from operating hours
-- Hold consecutive slots for a short window before checkout
-- Initialize and verify payments through Razorpay
-- Store confirmed bookings and support cancellations before start time
-- Manage partner-owned spaces and partner booking views
-- Track recent searches and trending localities
-- Ask the AI assistant for space recommendations using natural language
-
-## Quick start
-
-### 1. Configure environment variables
-
-Copy:
+1. Copy env:
 
 ```bash
 cp spaceiq/.env.example spaceiq/.env
 ```
 
-For frontend local development, also copy the `NEXT_PUBLIC_*` values into:
-
-```text
-spaceiq/frontend/.env.local
-```
-
-### 2. Run with Docker
-
-From the repo root:
-
-```bash
-docker compose up --build
-```
-
-This starts:
-
-- Postgres on `localhost:5432`
-- Redis on `localhost:6379`
-- FastAPI backend on `http://localhost:8000`
-- Next.js frontend on `http://localhost:3000`
-
-### 3. Seed demo accounts
-
-After the stack is running:
-
-```bash
-docker compose exec backend python -m app.scripts.seed_demo_users
-docker compose exec backend python -m app.scripts.seed_demo_inventory
-```
-
-Demo credentials:
-
-- `test@spaceiq.in` / `Test@123`
-- `partner@spaceiq.in` / `Test@123`
-
-## Manual local development
-
-### Backend
+2. Backend:
 
 ```bash
 cd spaceiq/backend
@@ -128,7 +57,7 @@ python -m app.scripts.seed_demo_inventory
 uvicorn app.main:app --reload
 ```
 
-### Frontend
+3. Frontend:
 
 ```bash
 cd spaceiq/frontend
@@ -136,27 +65,18 @@ npm install
 npm run dev
 ```
 
-## Local fallback behavior
+## Demo credentials
 
-- If `REDIS_URL` is blank, slot holds still work through the database.
-- If Razorpay keys are blank, checkout falls back to a demo payment flow.
-- If Google Places is not configured, the partner sync flow falls back to demo Bangalore inventory.
-- If `OPENAI_API_KEY` is missing, the assistant uses deterministic parsing instead of an LLM call.
+- `test@spaceiq.in` / `Test@123`
+- `partner@spaceiq.in` / `Test@123`
 
-## Deployment
+## Why this is resume-ready
 
-- Frontend: import `spaceiq/frontend` into Vercel
-- Backend: deploy `spaceiq/backend` to Render or another Python host
-- Database: Neon / Supabase Postgres or any Postgres-compatible service
-- Cache: Upstash Redis or any Redis-compatible service
+- Clear end-to-end business flow (search -> hold -> pay -> confirm).
+- Good backend design discussion (routers/services/models/schemas separation).
+- Includes practical product concerns like slot conflicts and payment verification.
 
-The included `docker-compose.yml` and `render.yaml` are already aligned with the active app entrypoint: `uvicorn app.main:app`.
+## Interview explanation tip
 
-## Interview prep
-
-Use [spaceiq/INTERVIEW_GUIDE.md](spaceiq/INTERVIEW_GUIDE.md) for:
-
-- a 30-second project pitch
-- architecture explanation
-- booking lifecycle walkthrough
-- likely interview questions and strong answers
+When explaining structure, use this one-liner:
+"Frontend handles user flow and state, backend handles business rules, and database consistency is protected by slot holds + payment verification before booking confirmation."

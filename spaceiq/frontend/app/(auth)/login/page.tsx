@@ -11,7 +11,6 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { GoogleSignInButton } from "@/components/auth/google-sign-in-button";
 import { useLogin } from "@/hooks/use-auth";
 
 const loginSchema = z.object({
@@ -47,7 +46,7 @@ export default function LoginPage() {
     try {
       await login.mutateAsync(values);
       toast.success("Welcome back to SpaceIQ.");
-      router.push("/dashboard");
+      router.push("/explore");
     } catch (error) {
       toast.error(getErrorDetail(error));
     }
@@ -93,7 +92,7 @@ export default function LoginPage() {
                 <p className="text-sm font-medium uppercase tracking-[0.24em] text-primary">Login</p>
                 <h2 className="text-3xl font-semibold tracking-tight text-slate-950">Access your SpaceIQ account</h2>
                 <p className="text-sm leading-7 text-slate-500">
-                  Use your email and password to continue to bookings, analytics, and saved spaces.
+                  Use your email and password to continue to exploration and bookings.
                 </p>
               </div>
 
@@ -119,8 +118,6 @@ export default function LoginPage() {
                   Sign in
                 </Button>
               </form>
-
-              <GoogleSignInButton mode="signin" />
 
               <p className="text-sm text-slate-500">
                 New to SpaceIQ?{" "}
