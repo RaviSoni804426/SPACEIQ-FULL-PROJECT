@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CalendarClock, CreditCard, MapPin } from "lucide-react";
+import { ArrowRight, CalendarClock, CreditCard, MapPin, BrainCircuit } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -32,13 +32,19 @@ export default function HomePage() {
           SpaceIQ Lite: A clean full-stack booking app for portfolio and interviews.
         </h1>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-          This simplified version focuses on one strong journey: discover spaces, hold slots, pay, and track bookings.
+          This version is tailored for Data Science & AI. It features an NLP Chatbot and a Pandas-driven Analytics timeline.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link href="/explore">
             <Button size="lg">
               Start Exploring
               <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+          <Link href="/ai">
+            <Button size="lg" className="bg-indigo-600 hover:bg-indigo-700 text-white">
+              <BrainCircuit className="mr-2 h-4 w-4" />
+              AI & Data Science Dashboard
             </Button>
           </Link>
           <Link href="/my-bookings">

@@ -13,7 +13,7 @@ from slowapi.extension import _rate_limit_exceeded_handler
 
 from app.config import settings
 from app.database import SessionLocal
-from app.routers import auth, bookings, payments, reviews, spaces
+from app.routers import auth, bookings, payments, reviews, spaces, ai
 from app.services.slot_manager import sweep_expired_holds
 from app.utils.logging import configure_logging
 from app.utils.rate_limit import limiter
@@ -52,6 +52,7 @@ app.include_router(spaces.router)
 app.include_router(bookings.router)
 app.include_router(payments.router)
 app.include_router(reviews.router)
+app.include_router(ai.router)
 
 
 @app.exception_handler(HTTPException)
