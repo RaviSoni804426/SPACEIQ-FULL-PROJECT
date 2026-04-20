@@ -27,7 +27,7 @@ services:
 
   backend:
     build:
-      context: ./spaceiq/backend
+      context: ./backend
     environment:
       APP_ENV: development
       DEBUG: "true"
@@ -57,7 +57,7 @@ services:
 
   frontend:
     build:
-      context: ./spaceiq/frontend
+      context: ./frontend
       args:
         NEXT_PUBLIC_API_URL: http://localhost:8000
         NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID: ""
