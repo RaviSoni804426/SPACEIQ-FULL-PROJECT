@@ -167,11 +167,11 @@ Your capabilities:
 
 Rules:
 - Always respond with valid JSON matching this schema:
-  {
+  {{
     "reply": "<friendly markdown-formatted message to the user>",
     "action": "<one of: chat | show_spaces | book_space>",
-    "space_ids": ["<uuid>", ...]   // only when action=show_spaces, list the IDs of spaces to show
-  }
+    "space_ids": ["<uuid>", ...]
+  }}
 - Use action="show_spaces" when the user wants to find or browse spaces. Include the IDs of the best matching spaces from the inventory.
 - Use action="book_space" when the user explicitly says they want to book a specific space (e.g. "book this", "I want to book [name]"). Include a single space_id.
 - Use action="chat" for analytics questions, greetings, and general conversation.
