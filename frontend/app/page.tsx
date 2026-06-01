@@ -21,6 +21,11 @@ const CORE_HIGHLIGHTS = [
     description: "Razorpay-backed payment verification with booking confirmation.",
     icon: CreditCard,
   },
+  {
+    title: "AI Revenue Intelligence",
+    description: "Forecasting, segmentation, NLP sentiment analysis, and an AI insights chatbot.",
+    icon: BrainCircuit,
+  },
 ];
 
 export default function HomePage() {
@@ -32,7 +37,7 @@ export default function HomePage() {
           SpaceIQ Lite: A clean full-stack booking app for portfolio and interviews.
         </h1>
         <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
-          This version is tailored for Data Science & AI. It features an NLP Chatbot and a Pandas-driven Analytics timeline.
+          This version is tailored for Data Science & AI. It includes forecasting, customer segmentation, NLP sentiment analysis, and an AI analytics copilot.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link href="/explore">

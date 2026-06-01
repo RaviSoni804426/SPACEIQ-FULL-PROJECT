@@ -97,3 +97,88 @@ export interface ApiError {
   detail: string;
   code: string;
 }
+
+export interface AIRevenueDailyPoint {
+  date: string;
+  revenue: number;
+  bookings: number;
+}
+
+export interface AIRevenueMonthlyPoint {
+  month: string;
+  revenue: number;
+  bookings: number;
+  growth_pct: number | null;
+}
+
+export interface AIForecastPoint {
+  date: string;
+  predicted_revenue: number;
+  lower: number;
+  upper: number;
+}
+
+export interface AIRevenueSegment {
+  segment: string;
+  revenue: number;
+  bookings: number;
+  share_pct: number;
+}
+
+export interface AICustomerTier {
+  segment: string;
+  users: number;
+  revenue: number;
+  avg_recency_days: number;
+  avg_successful_bookings: number;
+}
+
+export interface AIKeyword {
+  keyword: string;
+  count: number;
+}
+
+export interface AITopicMention {
+  topic: string;
+  mentions: number;
+}
+
+export interface AIAnalyticsOverview {
+  total_bookings: number;
+  successful_bookings: number;
+  total_revenue: number;
+  avg_booking_value: number;
+  cancellation_rate_pct: number;
+  repeat_customer_rate_pct: number;
+  search_to_booking_conversion_pct: number;
+  month_over_month_growth_pct: number | null;
+  projected_next_30d_revenue: number;
+  forecast_confidence: "low" | "medium" | "high";
+}
+
+export interface AIAnalyticsPayload {
+  generated_at: string;
+  overview: AIAnalyticsOverview;
+  revenue: {
+    daily: AIRevenueDailyPoint[];
+    monthly: AIRevenueMonthlyPoint[];
+    forecast_next_14_days: AIForecastPoint[];
+  };
+  segmentation: {
+    by_space_type: AIRevenueSegment[];
+    by_locality: AIRevenueSegment[];
+    customer_tiers: AICustomerTier[];
+  };
+  nlp: {
+    review_sentiment: {
+      positive_pct: number;
+      neutral_pct: number;
+      negative_pct: number;
+      sample_size: number;
+      average_rating: number;
+    };
+    top_keywords: AIKeyword[];
+    topic_breakdown: AITopicMention[];
+  };
+  recommendations: string[];
+}

@@ -1,146 +1,432 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { Activity, BrainCircuit, Bot, TrendingUp, DollarSign, Database } from "lucide-react";
+import { type ComponentType, useEffect, useMemo, useState } from "react";
+import {
+  Area,
+  AreaChart,
+  Bar,
+  BarChart,
+  CartesianGrid,
+  Cell,
+  Line,
+  LineChart,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
+  Activity,
+  BarChart3,
+  Bot,
+  BrainCircuit,
+  IndianRupee,
+  Percent,
+  Sparkles,
+  TrendingUp,
+  Users,
+} from "lucide-react";
+
+import { apiClient } from "@/lib/api";
+import type { AIAnalyticsPayload } from "@/types";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+
+const SEGMENT_COLORS = ["#1d4ed8", "#0f766e", "#d97706", "#7c3aed", "#be123c", "#334155"];
+
+const currency = new Intl.NumberFormat("en-IN", {
+  style: "currency",
+  currency: "INR",
+  maximumFractionDigits: 0,
+});
 
 export default function AIDashboard() {
   const [chatInput, setChatInput] = useState("");
   const [messages, setMessages] = useState<{ role: "system" | "user" | "ai"; content: string }[]>([
-    { role: "system", content: "AI Booking Assistant Initialized. Ask me for recommendations or predictions!" }
+    {
+      role: "system",
+      content:
+        "SpaceIQ AI is ready. Ask for recommendations, forecast interpretation, or customer segment insights.",
+    },
   ]);
   const [isTyping, setIsTyping] = useState(false);
-  const [analytics, setAnalytics] = useState<any>(null);
+  const [analytics, setAnalytics] = useState<AIAnalyticsPayload | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    fetch(process.env.NEXT_PUBLIC_API_URL + "/ai/analytics")
-      .then(res => res.json())
-      .then(data => setAnalytics(data))
-      .catch(err => console.error("Could not fetch analytics", err));
+    apiClient
+      .aiAnalytics()
+      .then((data) => setAnalytics(data))
+      .catch((error) => {
+        setMessages((prev) => [
+          ...prev,
+          {
+            role: "system",
+            content: `Could not load analytics: ${error?.detail ?? "unknown error"}`,
+          },
+        ]);
+      })
+      .finally(() => setIsLoading(false));
   }, []);
 
   const handleSendMessage = async () => {
     if (!chatInput.trim()) return;
-    const currentInput = chatInput;
-    setMessages(prev => [...prev, { role: "user", content: currentInput }]);
+    const currentInput = chatInput.trim();
     setChatInput("");
+    setMessages((prev) => [...prev, { role: "user", content: currentInput }]);
     setIsTyping(true);
 
     try {
-      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + "/ai/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: currentInput })
-      });
-      const data = await res.json();
-      setMessages(prev => [...prev, { role: "ai", content: data.reply || "API Key Error" }]);
-    } catch (e) {
-      setMessages(prev => [...prev, { role: "system", content: "Error connecting to AI engine." }]);
+      const data = await apiClient.aiChat(currentInput);
+      setMessages((prev) => [...prev, { role: "ai", content: data.reply || "No reply received." }]);
+    } catch (error: any) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "system",
+          content: `AI request failed: ${error?.detail ?? "connection error"}`,
+        },
+      ]);
     } finally {
       setIsTyping(false);
     }
   };
 
+  const monthlyRevenue = analytics?.revenue.monthly ?? [];
+  const forecast = analytics?.revenue.forecast_next_14_days ?? [];
+  const byType = analytics?.segmentation.by_space_type ?? [];
+  const byLocality = analytics?.segmentation.by_locality ?? [];
+  const customerTiers = analytics?.segmentation.customer_tiers ?? [];
+  const topKeywords = analytics?.nlp.top_keywords?.slice(0, 10) ?? [];
+
+  const sentimentData = useMemo(() => {
+    const sentiment = analytics?.nlp.review_sentiment;
+    if (!sentiment) return [];
+    return [
+      { name: "Positive", value: sentiment.positive_pct, color: "#16a34a" },
+      { name: "Neutral", value: sentiment.neutral_pct, color: "#64748b" },
+      { name: "Negative", value: sentiment.negative_pct, color: "#dc2626" },
+    ];
+  }, [analytics]);
+
+  const growthLabel =
+    analytics?.overview.month_over_month_growth_pct === null
+      ? "N/A"
+      : `${analytics?.overview.month_over_month_growth_pct.toFixed(2)}%`;
+
   return (
-    <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-8">
-      <div className="flex items-center gap-3">
-        <BrainCircuit className="h-8 w-8 text-orange-500" />
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900">Data Science & AI Hub</h1>
-        <Badge variant="outline" className="ml-auto bg-orange-50 text-orange-600 border-orange-200">
-          Powered by Pandas & Llama-3
-        </Badge>
+    <div className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-4 py-8 sm:px-6 lg:px-8">
+      <div className="rounded-[28px] bg-gradient-to-r from-slate-950 via-slate-900 to-blue-900 px-6 py-7 text-white shadow-xl sm:px-8">
+        <div className="flex flex-wrap items-center gap-3">
+          <BrainCircuit className="h-7 w-7 text-cyan-300" />
+          <h1 className="text-3xl font-semibold tracking-tight">AI + Data Science Command Center</h1>
+          <Badge className="ml-auto border-cyan-200/40 bg-cyan-200/10 text-cyan-100">
+            Portfolio Edition
+          </Badge>
+        </div>
+        <p className="mt-3 max-w-3xl text-sm leading-7 text-slate-200 sm:text-base">
+          Forecast revenue, analyze customer segments, and run NLP sentiment analysis from booking and review data.
+        </p>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Chatbot Card */}
-        <Card className="flex flex-col h-[500px] border-slate-200 shadow-sm">
-          <CardHeader className="bg-slate-50 border-b pb-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+        <MetricCard
+          title="Total Revenue"
+          value={currency.format(analytics?.overview.total_revenue ?? 0)}
+          subtitle="Confirmed + completed bookings"
+          icon={IndianRupee}
+        />
+        <MetricCard
+          title="Avg Booking Value"
+          value={currency.format(analytics?.overview.avg_booking_value ?? 0)}
+          subtitle="Revenue per successful booking"
+          icon={BarChart3}
+        />
+        <MetricCard
+          title="MoM Growth"
+          value={growthLabel}
+          subtitle="Monthly growth trend"
+          icon={TrendingUp}
+        />
+        <MetricCard
+          title="Cancellation Rate"
+          value={`${analytics?.overview.cancellation_rate_pct.toFixed(2) ?? "0.00"}%`}
+          subtitle="Share of cancelled bookings"
+          icon={Percent}
+        />
+        <MetricCard
+          title="Repeat Customer Rate"
+          value={`${analytics?.overview.repeat_customer_rate_pct.toFixed(2) ?? "0.00"}%`}
+          subtitle="Users with 2+ successful bookings"
+          icon={Users}
+        />
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[1.2fr_1fr]">
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader className="border-b bg-slate-50">
             <CardTitle className="flex items-center gap-2">
-              <Bot className="h-5 w-5 text-indigo-500" />
-              Smart Space Assistant
+              <Activity className="h-5 w-5 text-blue-700" />
+              Monthly Revenue Trend
             </CardTitle>
-            <CardDescription>NLP powered property recommendation agent</CardDescription>
+            <CardDescription>Revenue and booking count progression over time</CardDescription>
           </CardHeader>
-          <CardContent className="flex-1 flex flex-col p-4 overflow-hidden gap-4">
-            <div className="flex-1 overflow-y-auto space-y-4 pr-2">
-              {messages.map((msg, i) => (
-                <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <div className={`max-w-[80%] rounded-2xl px-4 py-2 text-sm ${msg.role === "user" ? "bg-slate-900 text-white" : msg.role === "system" ? "bg-slate-100 text-slate-500 italic text-xs mx-auto" : "bg-orange-100 text-slate-900"}`}>
+          <CardContent className="h-[320px] p-4">
+            {isLoading ? (
+              <CenteredText text="Loading analytics..." />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={monthlyRevenue}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="month" tick={{ fontSize: 12 }} />
+                  <YAxis yAxisId="left" tick={{ fontSize: 12 }} />
+                  <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 12 }} />
+                  <Tooltip formatter={(value: number, key) => (key === "revenue" ? currency.format(value) : value)} />
+                  <Line yAxisId="left" type="monotone" dataKey="revenue" stroke="#2563eb" strokeWidth={3} dot={{ r: 3 }} />
+                  <Line yAxisId="right" type="monotone" dataKey="bookings" stroke="#f97316" strokeWidth={2} dot={{ r: 2 }} />
+                </LineChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader className="border-b bg-slate-50">
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-emerald-600" />
+              14-Day Revenue Forecast
+            </CardTitle>
+            <CardDescription>
+              Model confidence: <span className="font-medium uppercase">{analytics?.overview.forecast_confidence ?? "low"}</span>
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="h-[320px] p-4">
+            {isLoading ? (
+              <CenteredText text="Computing forecast..." />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={forecast}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="date" tick={{ fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 12 }} />
+                  <Tooltip formatter={(value: number) => currency.format(value)} />
+                  <Area type="monotone" dataKey="upper" stroke="#cbd5e1" fill="#e2e8f0" fillOpacity={0.5} />
+                  <Area type="monotone" dataKey="lower" stroke="#cbd5e1" fill="#ffffff" fillOpacity={1} />
+                  <Line type="monotone" dataKey="predicted_revenue" stroke="#16a34a" strokeWidth={3} dot={{ r: 2 }} />
+                </AreaChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader className="border-b bg-slate-50">
+            <CardTitle>Revenue by Space Type</CardTitle>
+            <CardDescription>Product-mix segmentation by business line</CardDescription>
+          </CardHeader>
+          <CardContent className="h-[290px] p-4">
+            {isLoading ? (
+              <CenteredText text="Loading segmentation..." />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={byType}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="segment" tick={{ fontSize: 12 }} />
+                  <YAxis tick={{ fontSize: 12 }} />
+                  <Tooltip formatter={(value: number, key) => (key === "revenue" ? currency.format(value) : value)} />
+                  <Bar dataKey="revenue" radius={[8, 8, 0, 0]}>
+                    {byType.map((_, idx) => (
+                      <Cell key={idx} fill={SEGMENT_COLORS[idx % SEGMENT_COLORS.length]} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader className="border-b bg-slate-50">
+            <CardTitle>Revenue by Locality</CardTitle>
+            <CardDescription>Geo-segmentation for demand concentration</CardDescription>
+          </CardHeader>
+          <CardContent className="h-[290px] p-4">
+            {isLoading ? (
+              <CenteredText text="Loading localities..." />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={byLocality} layout="vertical" margin={{ left: 24 }}>
+                  <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                  <XAxis type="number" tick={{ fontSize: 12 }} />
+                  <YAxis type="category" dataKey="segment" width={110} tick={{ fontSize: 12 }} />
+                  <Tooltip formatter={(value: number) => currency.format(value)} />
+                  <Bar dataKey="revenue" fill="#0f766e" radius={[0, 8, 8, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[1.1fr_1fr]">
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader className="border-b bg-slate-50">
+            <CardTitle>NLP Review Sentiment</CardTitle>
+            <CardDescription>
+              Review sample: {analytics?.nlp.review_sentiment.sample_size ?? 0} | Avg rating: {analytics?.nlp.review_sentiment.average_rating ?? 0}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="grid h-[320px] gap-4 p-4 sm:grid-cols-2">
+            <div className="h-full">
+              {isLoading ? (
+                <CenteredText text="Parsing reviews..." />
+              ) : (
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie data={sentimentData} dataKey="value" nameKey="name" outerRadius={80} innerRadius={45} label>
+                      {sentimentData.map((entry) => (
+                        <Cell key={entry.name} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip formatter={(value: number) => `${value.toFixed(2)}%`} />
+                  </PieChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+            <div className="space-y-2 overflow-y-auto pr-2">
+              <p className="text-sm font-medium text-slate-700">Top keywords</p>
+              {topKeywords.length === 0 ? (
+                <p className="text-sm text-slate-500">No review text available yet.</p>
+              ) : (
+                topKeywords.map((item) => (
+                  <div key={item.keyword} className="flex items-center justify-between rounded-lg border border-slate-200 px-3 py-2 text-sm">
+                    <span className="font-medium text-slate-700">{item.keyword}</span>
+                    <Badge className="border-slate-300 bg-white text-slate-700">{item.count}</Badge>
+                  </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="flex flex-col border-slate-200 shadow-sm">
+          <CardHeader className="border-b bg-slate-50">
+            <CardTitle className="flex items-center gap-2">
+              <Bot className="h-5 w-5 text-indigo-600" />
+              AI Analytics Chatbot
+            </CardTitle>
+            <CardDescription>Ask for insights, recommendations, or KPI interpretation</CardDescription>
+          </CardHeader>
+          <CardContent className="flex h-[420px] flex-1 flex-col gap-3 p-4">
+            <div className="flex-1 space-y-3 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-3">
+              {messages.map((msg, index) => (
+                <div key={index} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                  <div
+                    className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-6 ${
+                      msg.role === "user"
+                        ? "bg-slate-900 text-white"
+                        : msg.role === "system"
+                          ? "bg-slate-200 text-slate-600"
+                          : "bg-indigo-100 text-slate-900"
+                    }`}
+                  >
                     {msg.content}
                   </div>
                 </div>
               ))}
-              {isTyping && (
-                <div className="flex justify-start">
-                  <div className="bg-orange-50 text-orange-400 rounded-2xl px-4 py-2 text-sm animate-pulse">
-                    Thinking...
-                  </div>
-                </div>
-              )}
+              {isTyping ? <p className="text-sm text-indigo-500">AI is thinking...</p> : null}
             </div>
-            <div className="flex items-center gap-2 pt-2 border-t">
+            <div className="flex items-center gap-2">
               <Input
-                placeholder="Ask about space availability, pricing..."
+                placeholder="e.g. What locality has highest revenue share?"
                 value={chatInput}
-                onChange={e => setChatInput(e.target.value)}
-                onKeyDown={e => e.key === "Enter" && handleSendMessage()}
+                onChange={(event) => setChatInput(event.target.value)}
+                onKeyDown={(event) => event.key === "Enter" && handleSendMessage()}
               />
               <Button onClick={handleSendMessage}>Send</Button>
             </div>
           </CardContent>
         </Card>
+      </div>
 
-        {/* Analytics Dashboard */}
-        <div className="flex flex-col gap-6">
-          <div className="grid grid-cols-2 gap-4">
-            <Card className="border-slate-200 bg-slate-50 shadow-none">
-              <CardContent className="p-4 flex flex-col justify-center items-center h-full">
-                <TrendingUp className="h-6 w-6 text-emerald-500 mb-2" />
-                <p className="text-2xl font-bold">${analytics?.metrics?.predicted_next_day_revenue || 0}</p>
-                <p className="text-xs text-slate-500 uppercase tracking-widest">Pred. Daily Rev</p>
-              </CardContent>
-            </Card>
-            <Card className="border-slate-200 bg-slate-50 shadow-none">
-              <CardContent className="p-4 flex flex-col justify-center items-center h-full">
-                <Database className="h-6 w-6 text-blue-500 mb-2" />
-                <p className="text-2xl font-bold">{analytics?.metrics?.total_bookings || 0}</p>
-                <p className="text-xs text-slate-500 uppercase tracking-widest">Total Datapoints</p>
-              </CardContent>
-            </Card>
-          </div>
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader className="border-b bg-slate-50">
+            <CardTitle>Customer Tier Distribution</CardTitle>
+            <CardDescription>Behavior-based segmentation for retention and growth</CardDescription>
+          </CardHeader>
+          <CardContent className="h-[280px] p-4">
+            {isLoading ? (
+              <CenteredText text="Segmenting customers..." />
+            ) : (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={customerTiers}>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="segment" tick={{ fontSize: 11 }} />
+                  <YAxis tick={{ fontSize: 12 }} />
+                  <Tooltip />
+                  <Bar dataKey="users" fill="#7c3aed" radius={[8, 8, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </CardContent>
+        </Card>
 
-          <Card className="flex-1 border-slate-200 shadow-sm flex flex-col">
-            <CardHeader className="bg-slate-50 border-b pb-4">
-              <CardTitle className="flex items-center gap-2">
-                <Activity className="h-5 w-5 text-rose-500" />
-                Revenue Time-Series
-              </CardTitle>
-              <CardDescription>Pandas aggregated daily revenue pipeline</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1 min-h-[250px] p-4">
-              {analytics?.trend_data ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={analytics.trend_data} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                    <XAxis dataKey="date" tick={{fontSize: 12}} />
-                    <YAxis tick={{fontSize: 12}} />
-                    <Tooltip />
-                    <Line type="monotone" dataKey="total_amount" stroke="#f97316" strokeWidth={3} dot={{r: 4}} activeDot={{r: 6}} />
-                  </LineChart>
-                </ResponsiveContainer>
-              ) : (
-                <div className="h-full w-full flex items-center justify-center text-slate-400 text-sm">
-                  Loading ML Analytics...
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+        <Card className="border-slate-200 shadow-sm">
+          <CardHeader className="border-b bg-slate-50">
+            <CardTitle className="flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-amber-500" />
+              AI Recommendations
+            </CardTitle>
+            <CardDescription>Actionable business suggestions generated from current KPIs</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-3 p-4">
+            {(analytics?.recommendations ?? []).map((tip, index) => (
+              <div key={index} className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                {tip}
+              </div>
+            ))}
+            {!analytics?.recommendations?.length ? (
+              <p className="text-sm text-slate-500">Run demo analytics seeding to generate recommendations.</p>
+            ) : null}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
+}
+
+function MetricCard({
+  title,
+  value,
+  subtitle,
+  icon: Icon,
+}: {
+  title: string;
+  value: string;
+  subtitle: string;
+  icon: ComponentType<{ className?: string }>;
+}) {
+  return (
+    <Card className="border-slate-200 shadow-sm">
+      <CardContent className="space-y-2 p-4">
+        <div className="flex items-center justify-between text-slate-500">
+          <span className="text-xs font-medium uppercase tracking-wide">{title}</span>
+          <Icon className="h-4 w-4" />
+        </div>
+        <p className="text-2xl font-semibold text-slate-900">{value}</p>
+        <p className="text-xs text-slate-500">{subtitle}</p>
+      </CardContent>
+    </Card>
+  );
+}
+
+function CenteredText({ text }: { text: string }) {
+  return <div className="flex h-full w-full items-center justify-center text-sm text-slate-500">{text}</div>;
 }

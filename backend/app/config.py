@@ -64,6 +64,7 @@ class Settings(BaseSettings):
     razorpay_key_id: str = ""
     razorpay_key_secret: str = ""
     next_public_razorpay_key_id: str = ""
+    groq_api_key: str = ""
 
     redis_url: str = ""
     hold_duration_seconds: int = 300

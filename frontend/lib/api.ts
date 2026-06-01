@@ -2,6 +2,7 @@ import axios from "axios";
 
 import { getAuthSnapshot } from "@/store/auth-store";
 import type {
+  AIAnalyticsPayload,
   Booking,
   HoldResponse,
   Review,
@@ -96,6 +97,14 @@ export const apiClient = {
   },
   createReview: async (payload: { booking_id: string; rating: number; comment?: string }) => {
     const { data } = await api.post<Review>("/api/reviews", payload);
+    return data;
+  },
+  aiChat: async (message: string) => {
+    const { data } = await api.post<{ reply: string }>("/ai/chat", { message });
+    return data;
+  },
+  aiAnalytics: async () => {
+    const { data } = await api.get<AIAnalyticsPayload>("/ai/analytics");
     return data;
   },
 };
