@@ -14,6 +14,7 @@ import { useAuthStore } from "@/store/auth-store";
 const NAV_ITEMS = [
   { href: "/", label: "Home" },
   { href: "/explore", label: "Explore & Book" },
+  { href: "/chat", label: "AI Chat" },
   { href: "/my-bookings", label: "My Bookings" },
   { href: "/account", label: "Account" },
 ];
