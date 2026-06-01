@@ -99,8 +99,22 @@ export const apiClient = {
     const { data } = await api.post<Review>("/api/reviews", payload);
     return data;
   },
-  aiChat: async (message: string) => {
-    const { data } = await api.post<{ reply: string }>("/ai/chat", { message });
+  aiChat: async (message: string, history: { role: string; content: string }[] = []) => {
+    const { data } = await api.post<{
+      reply: string;
+      action: "chat" | "show_spaces" | "book_space";
+      spaces: {
+        id: string;
+        name: string;
+        type: string;
+        locality: string | null;
+        price_per_hour: number;
+        rating: number | null;
+        amenities: string[];
+        image_url: string | null;
+      }[];
+      book_space_id: string | null;
+    }>("/ai/chat", { message, history });
     return data;
   },
   aiAnalytics: async () => {

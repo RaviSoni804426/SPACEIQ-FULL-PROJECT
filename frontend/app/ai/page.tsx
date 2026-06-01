@@ -32,9 +32,8 @@ import {
 import { apiClient } from "@/lib/api";
 import type { AIAnalyticsPayload } from "@/types";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
+import { AiChatbot } from "@/components/ai/ai-chatbot";
 
 const SEGMENT_COLORS = ["#1d4ed8", "#0f766e", "#d97706", "#7c3aed", "#be123c", "#334155"];
 
@@ -45,15 +44,6 @@ const currency = new Intl.NumberFormat("en-IN", {
 });
 
 export default function AIDashboard() {
-  const [chatInput, setChatInput] = useState("");
-  const [messages, setMessages] = useState<{ role: "system" | "user" | "ai"; content: string }[]>([
-    {
-      role: "system",
-      content:
-        "SpaceIQ AI is ready. Ask for recommendations, forecast interpretation, or customer segment insights.",
-    },
-  ]);
-  const [isTyping, setIsTyping] = useState(false);
   const [analytics, setAnalytics] = useState<AIAnalyticsPayload | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -61,40 +51,9 @@ export default function AIDashboard() {
     apiClient
       .aiAnalytics()
       .then((data) => setAnalytics(data))
-      .catch((error) => {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "system",
-            content: `Could not load analytics: ${error?.detail ?? "unknown error"}`,
-          },
-        ]);
-      })
+      .catch(() => {/* analytics unavailable */})
       .finally(() => setIsLoading(false));
   }, []);
-
-  const handleSendMessage = async () => {
-    if (!chatInput.trim()) return;
-    const currentInput = chatInput.trim();
-    setChatInput("");
-    setMessages((prev) => [...prev, { role: "user", content: currentInput }]);
-    setIsTyping(true);
-
-    try {
-      const data = await apiClient.aiChat(currentInput);
-      setMessages((prev) => [...prev, { role: "ai", content: data.reply || "No reply received." }]);
-    } catch (error: any) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "system",
-          content: `AI request failed: ${error?.detail ?? "connection error"}`,
-        },
-      ]);
-    } finally {
-      setIsTyping(false);
-    }
-  };
 
   const monthlyRevenue = analytics?.revenue.monthly ?? [];
   const forecast = analytics?.revenue.forecast_next_14_days ?? [];
@@ -319,38 +278,12 @@ export default function AIDashboard() {
           <CardHeader className="border-b bg-slate-50">
             <CardTitle className="flex items-center gap-2">
               <Bot className="h-5 w-5 text-indigo-600" />
-              AI Analytics Chatbot
+              AI Booking Chatbot
             </CardTitle>
-            <CardDescription>Ask for insights, recommendations, or KPI interpretation</CardDescription>
+            <CardDescription>Find spaces, get recommendations, and book — all from chat</CardDescription>
           </CardHeader>
-          <CardContent className="flex h-[420px] flex-1 flex-col gap-3 p-4">
-            <div className="flex-1 space-y-3 overflow-y-auto rounded-xl border border-slate-200 bg-slate-50 p-3">
-              {messages.map((msg, index) => (
-                <div key={index} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
-                  <div
-                    className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm leading-6 ${
-                      msg.role === "user"
-                        ? "bg-slate-900 text-white"
-                        : msg.role === "system"
-                          ? "bg-slate-200 text-slate-600"
-                          : "bg-indigo-100 text-slate-900"
-                    }`}
-                  >
-                    {msg.content}
-                  </div>
-                </div>
-              ))}
-              {isTyping ? <p className="text-sm text-indigo-500">AI is thinking...</p> : null}
-            </div>
-            <div className="flex items-center gap-2">
-              <Input
-                placeholder="e.g. What locality has highest revenue share?"
-                value={chatInput}
-                onChange={(event) => setChatInput(event.target.value)}
-                onKeyDown={(event) => event.key === "Enter" && handleSendMessage()}
-              />
-              <Button onClick={handleSendMessage}>Send</Button>
-            </div>
+          <CardContent className="flex-1 p-0">
+            <AiChatbot fullPage />
           </CardContent>
         </Card>
       </div>

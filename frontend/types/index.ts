@@ -143,6 +143,34 @@ export interface AITopicMention {
   mentions: number;
 }
 
+export interface AIChatSpaceCard {
+  id: string;
+  name: string;
+  type: string;
+  locality: string | null;
+  price_per_hour: number;
+  rating: number | null;
+  amenities: string[];
+  image_url: string | null;
+}
+
+export type AIChatAction = "chat" | "show_spaces" | "book_space";
+
+export interface AIChatResponse {
+  reply: string;
+  action: AIChatAction;
+  spaces: AIChatSpaceCard[];
+  book_space_id: string | null;
+}
+
+export interface AIChatMessage {
+  role: "user" | "ai" | "system";
+  content: string;
+  action?: AIChatAction;
+  spaces?: AIChatSpaceCard[];
+  book_space_id?: string | null;
+}
+
 export interface AIAnalyticsOverview {
   total_bookings: number;
   successful_bookings: number;
