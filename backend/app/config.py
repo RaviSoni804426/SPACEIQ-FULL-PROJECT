@@ -59,7 +59,7 @@ class Settings(BaseSettings):
     refresh_token_expire_minutes: int = 60 * 24 * 14
 
     frontend_url: str = "http://localhost:3000"
-    allowed_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
+    allowed_origins: Any = Field(default_factory=lambda: ["http://localhost:3000"])
 
     razorpay_key_id: str = ""
     razorpay_key_secret: str = ""
@@ -81,6 +81,19 @@ class Settings(BaseSettings):
             return value
         if not value:
             return ["http://localhost:3000"]
+        
+        # Try to parse as JSON first (handles ["http://localhost:3000", ...] or ["*"] or "*")
+        import json
+        try:
+            parsed = json.loads(value)
+            if isinstance(parsed, list):
+                return [str(item).strip() for item in parsed if str(item).strip()]
+            if isinstance(parsed, str):
+                value = parsed
+        except (json.JSONDecodeError, TypeError):
+            pass
+            
+        # Fallback to comma-separated values
         return [item.strip() for item in str(value).split(",") if item.strip()]
 
     @field_validator("debug", mode="before")
