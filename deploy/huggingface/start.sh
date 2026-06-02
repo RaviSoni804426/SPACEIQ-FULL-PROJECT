@@ -7,12 +7,24 @@ export DATABASE_URL="${DATABASE_URL:-sqlite:////data/spaceiq.db}"
 export FRONTEND_URL="${FRONTEND_URL:-http://localhost:7860}"
 export ALLOWED_ORIGINS="${ALLOWED_ORIGINS:-http://localhost:7860}"
 export PORT="${PORT:-7860}"
+export SEED_DEMO_DATA="${SEED_DEMO_DATA:-true}"
+
+db_was_missing=false
+if [[ "$DATABASE_URL" == sqlite:* && ! -f /data/spaceiq.db ]]; then
+    db_was_missing=true
+fi
 
 cd /app/backend
 alembic upgrade head
-python -m app.scripts.seed_demo_users
-python -m app.scripts.seed_demo_inventory
-python -m app.scripts.seed_demo_analytics --days "${SEED_ANALYTICS_DAYS:-210}"
+
+if [[ "$SEED_DEMO_DATA" == "true" ]]; then
+    python -m app.scripts.seed_demo_users
+    python -m app.scripts.seed_demo_inventory
+
+    if [[ "$db_was_missing" == "true" || "${FORCE_SEED_ANALYTICS:-false}" == "true" ]]; then
+        python -m app.scripts.seed_demo_analytics --days "${SEED_ANALYTICS_DAYS:-210}"
+    fi
+fi
 
 uvicorn app.main:app --host 127.0.0.1 --port 8000 &
 backend_pid=$!

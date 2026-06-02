@@ -116,10 +116,12 @@ GROQ_API_KEY=<optional, for live AI responses>
 RAZORPAY_KEY_ID=<optional>
 RAZORPAY_KEY_SECRET=<optional secret>
 NEXT_PUBLIC_RAZORPAY_KEY_ID=<optional public key>
+SEED_DEMO_DATA=true
 SEED_ANALYTICS_DAYS=210
+FORCE_SEED_ANALYTICS=false
 ```
 
-The default Space database is SQLite at `/data/spaceiq.db`. For durable data across restarts, enable Hugging Face persistent storage or switch `DATABASE_URL` to a hosted Postgres database.
+The default Space database is SQLite at `/data/spaceiq.db`. A fresh Space seeds demo users, inventory, and analytics automatically. For durable data across restarts, enable Hugging Face persistent storage or switch `DATABASE_URL` to a hosted Postgres database.
 
 ## Portfolio Positioning
 
