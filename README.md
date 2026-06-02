@@ -1,3 +1,14 @@
+---
+title: SpaceIQ AI Revenue Intelligence Platform
+emoji: 🏢
+colorFrom: indigo
+colorTo: blue
+sdk: docker
+app_port: 7860
+pinned: false
+license: mit
+---
+
 # SpaceIQ AI Revenue Intelligence Platform
 
 SpaceIQ is a full-stack booking product upgraded into a portfolio-grade Data Science + AI project.
@@ -89,6 +100,26 @@ npm run dev
 
 - `test@spaceiq.in` / `Test@123`
 - `partner@spaceiq.in` / `Test@123`
+
+## Hugging Face Spaces Deployment
+
+This repo is ready to deploy as a Docker Space. The root `Dockerfile` builds the Next.js frontend, runs the FastAPI backend, and exposes both through Nginx on port `7860`.
+
+1. Create a new Space on Hugging Face.
+2. Choose **Docker** as the Space SDK.
+3. Push this repository to the Space repository.
+4. In the Space **Settings**, add these variables/secrets:
+
+```text
+SECRET_KEY=<strong random string>
+GROQ_API_KEY=<optional, for live AI responses>
+RAZORPAY_KEY_ID=<optional>
+RAZORPAY_KEY_SECRET=<optional secret>
+NEXT_PUBLIC_RAZORPAY_KEY_ID=<optional public key>
+SEED_ANALYTICS_DAYS=210
+```
+
+The default Space database is SQLite at `/data/spaceiq.db`. For durable data across restarts, enable Hugging Face persistent storage or switch `DATABASE_URL` to a hosted Postgres database.
 
 ## Portfolio Positioning
 
