@@ -59,7 +59,7 @@ class Settings(BaseSettings):
     refresh_token_expire_minutes: int = 60 * 24 * 14
 
     frontend_url: str = "http://localhost:3000"
-    allowed_origins: str = "http://localhost:3000"
+    allowed_origins: list[str] = Field(default_factory=lambda: ["http://localhost:3000"])
 
     razorpay_key_id: str = ""
     razorpay_key_secret: str = ""
@@ -73,6 +73,15 @@ class Settings(BaseSettings):
     payment_rate_limit: str = "10/minute"
 
     log_level: str = "INFO"
+
+    @field_validator("allowed_origins", mode="before")
+    @classmethod
+    def parse_allowed_origins(cls, value: Any) -> list[str]:
+        if isinstance(value, list):
+            return value
+        if not value:
+            return ["http://localhost:3000"]
+        return [item.strip() for item in str(value).split(",") if item.strip()]
 
     @field_validator("debug", mode="before")
     @classmethod
@@ -90,12 +99,6 @@ class Settings(BaseSettings):
         if self.database_url.startswith("sqlite+aiosqlite:///"):
             return self.database_url.replace("sqlite+aiosqlite:///", "sqlite:///", 1)
         return self.database_url
-
-    @property
-    def allowed_origin_list(self) -> list[str]:
-        if not self.allowed_origins:
-            return ["http://localhost:3000"]
-        return [item.strip() for item in self.allowed_origins.split(",") if item.strip()]
 
     @property
     def is_production(self) -> bool:
