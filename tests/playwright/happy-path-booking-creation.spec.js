@@ -1,0 +1,1 @@
+Update the page.goto method to include a valid base URL, for example: await page.goto('https://example.com/login'); or use the global context's baseURL option when launching the browser, for example: const context = await browser.newContext({ baseURL: 'https://example.com/' });
