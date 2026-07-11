@@ -1,0 +1,1 @@
+Update the URL in the page.goto method to a valid URL, for example: await page.goto('https://example.com/register'); or ensure the server is configured to handle the '/register' route.
