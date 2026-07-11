@@ -1,1 +1,1 @@
-Update the page.goto line to use a fully qualified URL, for example: await page.goto('https://example.com/login'); or ensure the base URL is set using the browser context, for example: const context = await browser.newContext({ baseURL: 'https://example.com/' });
+Update the test script to use a more specific and reliable locator, and increase the timeout if necessary. For example: await page.fill('input[data-test="username"]', 'testuser', { timeout: 60000 }); or use a try-catch block to handle the timeout error and provide a more informative error message.
