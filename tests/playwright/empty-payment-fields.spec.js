@@ -1,0 +1,1 @@
+Update the page.goto('/login') line to use a valid URL, such as page.goto('https://example.com/login') or ensure the base URL is properly configured in the Playwright setup. For example: const url = 'https://example.com'; await page.goto(`${url}/login`);
