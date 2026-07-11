@@ -1,0 +1,1 @@
+await expect(page).toContainText('Invalid username or password'); await page.waitForTimeout(2000); await page.goto('/'); await page.goto('/spaces/1');
