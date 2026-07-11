@@ -1,1 +1,3 @@
-Update the initial page.goto call to a valid URL, such as the full base URL of the application, e.g. await page.goto('https://example.com/login'); or ensure the base URL is properly set in the Playwright configuration.
+await page.waitForLoadState('networkidle');
+await page.goto('/spaces/1');
+// Alternatively, ensure the URL is correct and the page is fully loaded before navigating to the next URL.
