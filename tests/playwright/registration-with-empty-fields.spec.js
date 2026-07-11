@@ -1,0 +1,1 @@
+Update the page.goto line to include the base URL, for example: await page.goto('https://example.com/register'); or set the base URL using the browser context: const context = await browser.newContext({ baseURL: 'https://example.com/' });
