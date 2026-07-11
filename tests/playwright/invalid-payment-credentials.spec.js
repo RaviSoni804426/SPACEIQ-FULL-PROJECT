@@ -1,0 +1,1 @@
+Update the line 'await page.goto('/login');' to 'await page.goto('https://example.com/login');' to use a valid URL, or ensure that the base URL is properly configured in the Playwright test setup.
